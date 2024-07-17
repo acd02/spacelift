@@ -165,6 +165,7 @@ export function clone<T extends object>(obj: T) {
   }
 }
 
+type NonPrimitiveGuard<T, Err extends string> = T extends string | number | boolean ? Err : T
 type Key = string | number
 type DraftCache = Record<Key, object | undefined>
 type MutateFunction = (mutation: () => void, changedKey: Key | {}) => void
@@ -239,7 +240,13 @@ interface DraftArray<T> {
    * If it returns true, a Draft item is created and  given to updateFunction, ready to be mutated.
    */
   updateIf(
-    predicate: (item: T, index: number) => boolean,
+    predicate: (
+      item: NonPrimitiveGuard<
+        T,
+        "TypeError: item is a primitive; use 'updateIf' with non-primitive types only"
+      >,
+      index: number
+    ) => boolean,
     updateFunction: (item: Draft<T>, index: number) => NoReturn
   ): void
 
